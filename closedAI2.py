@@ -103,9 +103,9 @@ def classify_requirement(requirement, evidence_chunks):
     # generator = pipeline("text2text-generation", model="google/flan-t5-small")
     # Build a prompt that includes the requirement and bullet-pointed evidence
     # prompt = f"Requirement: {requirement}\nEvidence:\n"
-    # big_chunk = ""
-    # for chunk in evidence_chunks:
-    #     big_chunk += chunk
+    big_chunk = ""
+    for chunk in evidence_chunks:
+        big_chunk += chunk
     # prompt = ""
     # # print("---------------------------------------------------------------------------")
     # # print(big_chunk)
@@ -120,18 +120,14 @@ def classify_requirement(requirement, evidence_chunks):
     # print(result)
     prompt = (
     "You are a compliance assistant.\n"
+    "1) First write the requirement at the beggining of the answer"
+    "2) given the evidence, find if the requirement is: 'Satisfied' or 'Not Satisfied' and explain in short why.\n"
     "Requirement: \n"
     f"{requirement}\n\n"
-    "Evidence0:\n"
-    f"{evidence_chunks[0]}\n\n"
-    "Evidence1:\n"
-    f"{evidence_chunks[1]}\n\n"
-    "Evidence2:\n"
-    f"{evidence_chunks[2]}\n\n"
-    "1) First write the requirement at the beggining of the answer"
-    "2) given the evidence, find if the requirement is: 'Satisfied', 'Not Satisfied', or 'Missing' and explain in short why.\n"
-    "3) Which evidence among Evidence0, Evidence1, Evidence2 satisfies the requirement ?"
+    "Evidence:\n"
+    f"{big_chunk}\n\n"
     )
+    #print(prompt)
     response = requests.post(
     "http://localhost:11434/api/generate",
     json={
@@ -183,7 +179,7 @@ def find_pdf_and_page_for_chunk(text_chunk, pdf_dir, match_type='exact'):
 
 
 pdf_directory = "./pdf_files"  
-requirement_list = ["The organization must have important discussions in public",
+requirement_list = ["There must not be clear communication channel for stakeholders.",
                     "The organization must have 60 football grounds for sports.",
                     "The organization shall determine external and internal issues that are relevant to its purpose and that affect its ability to achieve the intended outcome(s) of its information security management system.",
                     ]
@@ -206,10 +202,10 @@ for requirement_input in requirement_list:
     classification = classify_requirement(requirement_input, relevant_chunks)
 
     chunk0_posi = find_pdf_and_page_for_chunk(relevant_chunks[0], pdf_directory, match_type='exact')
-    print("Evidence0 is in", chunk0_posi)
+    print("reference1", chunk0_posi)
     chunk1_posi = find_pdf_and_page_for_chunk(relevant_chunks[1], pdf_directory, match_type='exact')
-    print("Evidence1 is in", chunk1_posi)
+    print("reference2", chunk1_posi)
     chunk2_posi = find_pdf_and_page_for_chunk(relevant_chunks[2], pdf_directory, match_type='exact')
-    print("Evidence2 is in", chunk2_posi)
+    print("reference3", chunk2_posi)
 
     print("---------------------------------------------------------------------------------------")
